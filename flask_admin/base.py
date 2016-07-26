@@ -212,7 +212,7 @@ class BaseView(with_metaclass(AdminViewMeta, BaseViewClass)):
             Generate Flask endpoint name. By default converts class name to lower case if endpoint is
             not explicitly provided.
         """
-        if endpoint:
+        if endpoint != None:
             return endpoint
 
         return self.__class__.__name__.lower()
@@ -261,11 +261,15 @@ class BaseView(with_metaclass(AdminViewMeta, BaseViewClass)):
         if self.name is None:
             self.name = self._prettify_class_name(self.__class__.__name__)
 
+        template_folder = self.admin.template_folder
+        if self.template_folder:
+            template_folder = op.join(template_folder, self.template_folder)
+
         # Create blueprint and register rules
         self.blueprint = Blueprint(self.endpoint, __name__,
                                    url_prefix=self.url,
                                    subdomain=self.admin.subdomain,
-                                   template_folder=op.join('templates', self.admin.template_mode),
+                                   template_folder=template_folder,
                                    static_folder=self.static_folder,
                                    static_url_path=self.static_url_path)
 
@@ -464,6 +468,7 @@ class Admin(object):
                  static_url_path=None,
                  base_template=None,
                  template_mode=None,
+                 template_folder=None,
                  category_icon_classes=None):
         """
             Constructor.
@@ -516,6 +521,7 @@ class Admin(object):
         self.subdomain = subdomain
         self.base_template = base_template or 'admin/base.html'
         self.template_mode = template_mode or 'bootstrap2'
+        self.template_folder = template_folder or op.join('templates', self.admin.template_mode)
         self.category_icon_classes = category_icon_classes or dict()
 
         # Add predefined index view

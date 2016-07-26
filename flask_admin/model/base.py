@@ -772,7 +772,7 @@ class BaseModelView(BaseView, ActionsMixin):
 
     # Endpoint
     def _get_endpoint(self, endpoint):
-        if endpoint:
+        if endpoint != None:
             return super(BaseModelView, self)._get_endpoint(endpoint)
 
         return self.model.__name__.lower()
