@@ -132,26 +132,26 @@ class BaseModelView(BaseView, ActionsMixin):
     """Is model list export allowed"""
 
     # Templates
-    list_template = 'admin/model/list.html'
+    list_template = 'model/list.html'
     """Default list view template"""
 
-    edit_template = 'admin/model/edit.html'
+    edit_template = 'model/edit.html'
     """Default edit template"""
 
-    create_template = 'admin/model/create.html'
+    create_template = 'model/create.html'
     """Default create template"""
 
-    details_template = 'admin/model/details.html'
+    details_template = 'model/details.html'
     """Default details view template"""
 
     # Modal Templates
-    edit_modal_template = 'admin/model/modals/edit.html'
+    edit_modal_template = 'model/modals/edit.html'
     """Default edit modal template"""
 
-    create_modal_template = 'admin/model/modals/create.html'
+    create_modal_template = 'model/modals/create.html'
     """Default create modal template"""
 
-    details_modal_template = 'admin/model/modals/details.html'
+    details_modal_template = 'model/modals/details.html'
     """Default details modal view template"""
 
     # Modals
@@ -1810,6 +1810,7 @@ class BaseModelView(BaseView, ActionsMixin):
 
         # Map column index to column name
         sort_column = self._get_column_by_idx(view_args.sort)
+
         if sort_column is not None:
             sort_column = sort_column[0]
 

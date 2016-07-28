@@ -154,7 +154,7 @@ class BaseView(with_metaclass(AdminViewMeta, BaseViewClass)):
         return args
 
     def __init__(self, name=None, category=None, endpoint=None, url=None,
-                 static_folder=None, static_url_path=None,
+                 static_folder=None, template_folder='', static_url_path=None,
                  menu_class_name=None, menu_icon_type=None, menu_icon_value=None):
         """
             Constructor.
@@ -192,6 +192,7 @@ class BaseView(with_metaclass(AdminViewMeta, BaseViewClass)):
         self.endpoint = self._get_endpoint(endpoint)
         self.url = url
         self.static_folder = static_folder
+        self.template_folder = template_folder
         self.static_url_path = static_url_path
         self.menu = None
 
@@ -262,6 +263,7 @@ class BaseView(with_metaclass(AdminViewMeta, BaseViewClass)):
             self.name = self._prettify_class_name(self.__class__.__name__)
 
         template_folder = self.admin.template_folder
+
         if self.template_folder:
             template_folder = op.join(template_folder, self.template_folder)
 
@@ -281,6 +283,13 @@ class BaseView(with_metaclass(AdminViewMeta, BaseViewClass)):
 
         return self.blueprint
 
+    # Resolve template path against view template_folder and app
+    # template_folder
+    def _get_template(self, template):
+        template = op.join(self.template_folder, template)
+        template = op.join(self.admin.template_folder, template)
+        return template
+
     def render(self, template, **kwargs):
         """
             Render template
@@ -290,9 +299,14 @@ class BaseView(with_metaclass(AdminViewMeta, BaseViewClass)):
             :param kwargs:
                 Template arguments
         """
+        template = self._get_template(template)
+
+        #if not op.isFile(template):
+        #    template = os.join(self.fallback_template_folder, )
+
         # Store self as admin_view
         kwargs['admin_view'] = self
-        kwargs['admin_base_template'] = self.admin.base_template
+        kwargs['admin_base_template'] = self._get_template(self.admin.base_template)
 
         # Provide i18n support even if flask-babel is not installed
         # or enabled.
@@ -433,11 +447,11 @@ class AdminIndexView(BaseView):
         * If an endpoint is not provided, will default to ``admin``
         * Default URL route is ``/admin``.
         * Automatically associates with static folder.
-        * Default template is ``admin/index.html``
+        * Default template is ``index.html``
     """
     def __init__(self, name=None, category=None,
                  endpoint=None, url=None,
-                 template='admin/index.html',
+                 template='index.html',
                  menu_class_name=None,
                  menu_icon_type=None,
                  menu_icon_value=None):
@@ -466,9 +480,8 @@ class Admin(object):
                  translations_path=None,
                  endpoint=None,
                  static_url_path=None,
-                 base_template=None,
-                 template_mode=None,
-                 template_folder=None,
+                 base_template='',
+                 template_folder='admin',
                  category_icon_classes=None):
         """
             Constructor.
@@ -494,9 +507,6 @@ class Admin(object):
                 all its views. Can be overridden in view configuration.
             :param base_template:
                 Override base HTML template for all static views. Defaults to `admin/base.html`.
-            :param template_mode:
-                Base template path. Defaults to `bootstrap2`. If you want to use
-                Bootstrap 3 integration, change it to `bootstrap3`.
             :param category_icon_classes:
                 A dict of category names as keys and html classes as values to be added to menu category icons.
                 Example: {'Favorites': 'glyphicon glyphicon-star'}
@@ -519,9 +529,9 @@ class Admin(object):
         self.url = url or self.index_view.url
         self.static_url_path = static_url_path
         self.subdomain = subdomain
-        self.base_template = base_template or 'admin/base.html'
-        self.template_mode = template_mode or 'bootstrap2'
-        self.template_folder = template_folder or op.join('templates', self.admin.template_mode)
+        self.base_template = base_template or 'base.html'
+        self.template_folder = template_folder
+        self.fallback_template_folder =  op.abspath(op.join(op.dirname(__file__), 'tmp'))
         self.category_icon_classes = category_icon_classes or dict()
 
         # Add predefined index view
